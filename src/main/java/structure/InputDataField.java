@@ -1,5 +1,8 @@
+package structure;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import params.Params;
 
 import java.util.HashMap;
 import java.util.Map;

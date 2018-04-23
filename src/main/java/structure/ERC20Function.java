@@ -1,7 +1,13 @@
+package structure;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.utils.Numeric;
+import params.Params;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +16,7 @@ import java.util.Map;
  * Created by cxa123230 on 4/20/2018.
  * here and there
  */
-class ERC20Function {
+public class ERC20Function {
     private static final Logger logger = LoggerFactory.getLogger(InputDataField.class);
     private static Map<String,String> functionNames = new HashMap<>();
 
@@ -21,31 +27,32 @@ class ERC20Function {
     private BigInteger value= new BigInteger("0");
 
     private String addresses[];
-    ERC20Function(String codeString) {
+
+    public ERC20Function(String codeString) {
         this.codeString = codeString;
     }
-   private  void setValue(BigInteger v){
-        this.value=v;
-    }
 
-    public BigInteger getValue() {
-        return value;
-    }
+    public static Map<String, ERC20Function> readERC20Functions() throws Exception {
 
+        Map<String, ERC20Function> funcMap = new HashMap<String, ERC20Function>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(Params.erc20FunctionsFile));
+            String line = br.readLine();//read header
+            int i = 0;
+            while ((line = br.readLine()) != null) {
+                String arr[] = line.split("\t");
+                ERC20Function ethFunction = new ERC20Function(arr[0]);
+                setName(arr[0], arr[1]);
+                funcMap.put(ethFunction.getCodeString(), ethFunction);
 
-   private  void setAddresses(String ... p){
-        addresses = new String[p.length];
-        int i=0;
-        for(String s:p){
-            if(s.length()!=Params.eth64)
-                logger.error("Parameter "+s+" is not of length "+Params.eth64);
-            else {
-                //addresses are 40 character long, excluding the 0x at the beginning.
-                addresses[i++] =Params.ethAddressPrecedingString+ s.substring(Params.ethAddressPrecedingZeros);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return funcMap;
     }
-    static Map<String, Integer> getOccMap() {
+
+    public static Map<String, Integer> getOccMap() {
         return occMap;
     }
 
@@ -154,21 +161,44 @@ class ERC20Function {
 
     }
 
-    static String getFunctionName(String codeString) {
+    public static String getFunctionName(String codeString) {
         return functionNames.get(codeString);
     }
 
-    String getCodeString() {
+    public static void setName(String codeString, String name) {
+        functionNames.put(codeString, name);
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    private void setValue(BigInteger v) {
+        this.value = v;
+    }
+
+    public String getCodeString() {
         return codeString;
     }
 
-    static void setName(String codeString, String name) {
-        functionNames.put(codeString,name);
-    }
     boolean hasAddress(){
         return (addresses!=null&&addresses.length>0);
     }
+
     public String[] getAddresses() {
         return addresses;
+    }
+
+    private void setAddresses(String... p) {
+        addresses = new String[p.length];
+        int i = 0;
+        for (String s : p) {
+            if (s.length() != Params.eth64)
+                logger.error("Parameter " + s + " is not of length " + Params.eth64);
+            else {
+                //addresses are 40 character long, excluding the 0x at the beginning.
+                addresses[i++] = Params.ethAddressPrecedingString + s.substring(Params.ethAddressPrecedingZeros);
+            }
+        }
     }
 }

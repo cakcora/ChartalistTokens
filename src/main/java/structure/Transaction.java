@@ -1,3 +1,5 @@
+package structure;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,15 +12,24 @@ import java.util.Set;
  * Created by cxa123230 on 4/21/2018.
  *
  */
-class Transaction {
+public class Transaction {
     private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
-    private ERC20Function funct;
-    private  String from;
     BigInteger gas_used;
     BigInteger gasLimit;
+    long unixTime;
+    private ERC20Function funct;
+    private String from;
     private String to;
     private BigInteger value;
-    long unixTime;
+
+    public Transaction(String from, String to, BigInteger val, BigInteger gas_used, ERC20Function df, long unixTime) {
+        this.from = from;
+        this.to = to;
+        this.value = val;
+        this.funct = df;
+        this.gas_used = gas_used;
+        this.unixTime = unixTime;
+    }
 
     @Override
     public String toString() {
@@ -46,16 +57,7 @@ class Transaction {
 
     }
 
-    Transaction(String from, String to, BigInteger val, BigInteger gas_used, ERC20Function df, long unixTime) {
-        this.from = from;
-        this.to=to;
-        this.value = val;
-        this.funct = df;
-        this.gas_used = gas_used;
-        this.unixTime = unixTime;
-    }
-
-    Set<String> getAllAddresses(){
+    public Set<String> getAllAddresses() {
         Set<String> ads = new HashSet<>();
         ads.add(from);
         ads.add(to);
@@ -67,8 +69,7 @@ class Transaction {
     }
 
     private boolean hasAFunction() {
-        if(funct==null) return false;
-        return true;
+        return funct != null;
     }
 
     BigInteger getValue(){

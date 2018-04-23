@@ -1,7 +1,13 @@
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
+import params.Params;
+import structure.Contract;
+import structure.ERC20Function;
+import structure.InputDataField;
+import structure.Transaction;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -9,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
+
 /**
  * Created by cxa123230 on 4/16/2018.
  *
@@ -28,9 +34,9 @@ public class TokenNetwork {
         BigInteger b = new BigInteger(v);
 
         FileUtils.cleanDirectory(new File(Params.tokenFilesDir));
-        Map<String, Contract> tokenMap = Params.readTopTokens();
+        Map<String, Contract> tokenMap = Contract.readTopTokens();
 
-        Map<String, ERC20Function> functionMap = Params.readERC20Functions();
+        Map<String, ERC20Function> functionMap = ERC20Function.readERC20Functions();
 
         Set<String> addressOfInterestList = new HashSet<>();
         logger.info(tokenMap.size() + " tokens."+tokenMap.keySet());

@@ -1,5 +1,11 @@
-import org.joda.time.DateTime;
+package structure;
 
+import org.joda.time.DateTime;
+import params.Params;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +33,32 @@ public class Contract {
     public Contract(String name){
         this.contractName = name;
     }
+
+    public static Map<String, Contract> readTopTokens(int top) throws Exception {
+        if (top <= 0) throw new Exception(top + " tokens requested. ");
+        Map<String, Contract> myMap = new HashMap<String, Contract>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(Params.tokenFile));
+            String line = br.readLine();//read header
+            int i = 0;
+            while ((line = br.readLine()) != null) {
+                String arr[] = line.split(",");
+                Contract contract = new Contract(arr[1], arr[2], arr[3]);
+                myMap.put(contract.getContractAddress(), contract);
+                if (++i >= top) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return myMap;
+    }
+
+    public static Map<String, Contract> readTopTokens() throws Exception {
+        return readTopTokens(Integer.MAX_VALUE);
+    }
+
     public String getContractOwner() {
         return contractOwner;
     }
