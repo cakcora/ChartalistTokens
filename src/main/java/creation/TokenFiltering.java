@@ -1,7 +1,8 @@
+package creation;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 import params.Params;
 import structure.Contract;
@@ -22,16 +23,11 @@ import java.util.Set;
  */
 
 
-public class TokenNetwork {
-    private static final Logger logger = LoggerFactory.getLogger(TokenNetwork.class);
-    private static String userToUser="userToUser";
+public class TokenFiltering {
+    private static final Logger logger = LoggerFactory.getLogger(TokenFiltering.class);
 
     public static void main(String args[]) throws Exception {
 
-        Uint256 value = new Uint256(new BigInteger("495"));
-        String s = "00000000000000000000000000000000000000000000001ad5814560aa5c0000";
-        String v = "495";
-        BigInteger b = new BigInteger(v);
 
         FileUtils.cleanDirectory(new File(Params.tokenFilesDir));
         Map<String, Contract> tokenMap = Contract.readTopTokens();
@@ -66,7 +62,7 @@ public class TokenNetwork {
             // delete token transactions from memory
             tokenMap.clear();
             //in the next step we are interested in user to user transactions.
-            tokenMap.put(userToUser,new Contract(userToUser));
+            tokenMap.put(Params.userToUser, new Contract(Params.userToUser));
         }
     }
 
@@ -139,7 +135,7 @@ public class TokenNetwork {
                         Transaction tx = new Transaction(from, to, val, gas_used, df, unixTime);
 
                         tokenMap.get(address).addTransaction(tx, unixTime);
-                        if(address.equalsIgnoreCase(userToUser)){
+                        if (address.equalsIgnoreCase(Params.userToUser)) {
                             if(count++>500000){
                                 writeToFile(address, tokenMap.get(address).getTransactions());
                                 tokenMap.get(address).clearTransactions();
@@ -183,7 +179,7 @@ public class TokenNetwork {
         } else {
             //searching for user to user transactions
             if (addresses.contains(from) & addresses.contains(to)) {
-                return userToUser;
+                return Params.userToUser;
             }
         }
         return address;

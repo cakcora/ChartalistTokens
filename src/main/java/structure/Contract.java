@@ -38,7 +38,7 @@ public class Contract {
         if (top <= 0) throw new Exception(top + " tokens requested. ");
         Map<String, Contract> myMap = new HashMap<String, Contract>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(Params.tokenFile));
+            BufferedReader br = new BufferedReader(new FileReader(Params.tokenInfoFile));
             String line = br.readLine();//read header
             int i = 0;
             while ((line = br.readLine()) != null) {
