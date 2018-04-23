@@ -15,6 +15,7 @@ import java.util.Map;
 
 /**
  * Created by cxa123230 on 4/16/2018.
+ *
  */
 
 
@@ -79,7 +80,7 @@ public class TokenGraph {
             } catch (Exception e) {
                 logger.error("Transaction is corrupted. Data is: " + line);
             }
-        }
+            }
 
         return edges;
     }

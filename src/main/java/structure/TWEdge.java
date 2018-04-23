@@ -41,10 +41,5 @@ public class TWEdge {
                 ;
     }
 
-    public TWEdge(long unixTime, String from, String to, BigInteger ethValue) {
-        this.unixTime = unixTime;
-        this.ethVal = ethValue;
-        this.from = from;
-        this.to = to;
-    }
+
 }
