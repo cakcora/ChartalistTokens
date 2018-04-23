@@ -12,7 +12,7 @@ Tracking top 69 tokens by transaction volume.
  transfer: 15253662 transactions  
  approve: 630488 transactions  
 
-number of paramaters in functions 
+number of paramaters in functions  
 1->2 times  
 2->15884151 times  
 3->162968 times  
@@ -31,6 +31,6 @@ transfer: 6449415 transactions
 approve: 268950 transactions  
 
 number of paramaters in functions   
--2->6718366 times  
--3->67694 times  
--4->1607 times  
+2->6718366 times  
+3->67694 times  
+4->1607 times  
