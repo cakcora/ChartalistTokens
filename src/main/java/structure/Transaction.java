@@ -68,7 +68,7 @@ public class Transaction {
         return ads;
     }
 
-    private boolean hasAFunction() {
+    public boolean hasAFunction() {
         return funct != null;
     }
 

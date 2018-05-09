@@ -26,7 +26,8 @@ public class InputDataField {
             if(functionMap.containsKey(func)){
                 if((length- erc20FunctionLength)%64!=0) {
                     //cannot parse parameters
-                    logger.info("Cannot parse data with length "+length);
+                    logger.warn("Cannot parse data with length " + length);
+                    return null;
                 }
                 else{
                     int paramLength = (length- erc20FunctionLength)/64;

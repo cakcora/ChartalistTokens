@@ -8,20 +8,20 @@ import java.math.BigInteger;
 public class TWEdge {
     long unixTime;
     BigInteger ethVal;
-    String tokenName;
-    BigInteger tokenValue;
-    String from;
-    String to;
+    String tokenName = "NONE";
+    BigInteger tokenValue = new BigInteger("0");
+    int from;
+    int to;
 
 
-    public TWEdge(long unixTime, String from, String to, BigInteger ethValue) {
+    public TWEdge(long unixTime, int from, int to, BigInteger ethValue) {
         this.unixTime = unixTime;
         this.ethVal = ethValue;
         this.from = from;
         this.to = to;
     }
 
-    public TWEdge(long unixTime, String from, String to, BigInteger ethValue, String tokenName, BigInteger tokenValue) {
+    public TWEdge(long unixTime, int from, int to, BigInteger ethValue, String tokenName, BigInteger tokenValue) {
         this.unixTime = unixTime;
         this.ethVal = ethValue;
         this.from = from;
@@ -32,14 +32,33 @@ public class TWEdge {
 
     @Override
     public String toString() {
-        return unixTime +
-                "," + from +
-                "," + to +
-                "," + ethVal +
-                "," + tokenName +
-                "," + tokenValue
+        return from +
+                " " + to +
+                " " + unixTime +
+                " " + ethVal +
+                " " + tokenName +
+                " " + tokenValue
+                ;
+    }
+
+    public String toTemporalMotifString() {
+        return from +
+                " " + to +
+                " " + unixTime
+                ;
+    }
+
+    public String toTDAEdge() {
+        return from +
+                " " + to +
+                " " + unixTime +
+                " " + tokenValue
                 ;
     }
 
 
+    public boolean hasTransferredValue() {
+        return !tokenValue.equals(BigInteger.ZERO);
+
+    }
 }

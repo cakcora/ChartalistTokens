@@ -21,4 +21,5 @@ public class Params {
 
     public static String userToUser = "userToUser";
     public static String graphFilesDir = "D:/Ethereum/graphs/";
+    public static String tmotifFilesDir = "D:/Ethereum/graphSamples/";
 }

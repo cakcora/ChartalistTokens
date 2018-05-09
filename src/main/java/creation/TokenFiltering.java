@@ -30,7 +30,7 @@ public class TokenFiltering {
 
 
         FileUtils.cleanDirectory(new File(Params.tokenFilesDir));
-        Map<String, Contract> tokenMap = Contract.readTopTokens();
+        Map<String, Contract> tokenMap = Contract.readTopTokens(200);
 
         Map<String, ERC20Function> functionMap = ERC20Function.readERC20Functions();
 
@@ -104,7 +104,7 @@ public class TokenFiltering {
         }
     }
 
-    private static void printFunctionParamOcc() {
+    static void printFunctionParamOcc() {
         logger.info("paramaters");
         Map<Integer, Long> paramLengths = InputDataField.getlengths();
         for(Integer i: paramLengths.keySet()){
@@ -112,7 +112,7 @@ public class TokenFiltering {
         }
     }
 
-    private static void readFiles(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, Set<String> addressOfInterestList, boolean tokenTransactionsOnly) throws IOException {
+    static void readFiles(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, Set<String> addressOfInterestList, boolean tokenTransactionsOnly) throws IOException {
         String line;
         int count =0;
         for (int i = 1; i <= 50; i++) {
@@ -129,25 +129,30 @@ public class TokenFiltering {
                     BigInteger val = Numeric.toBigInt(arr[5]);
                     long unixTime = Numeric.toBigInt(arr[9]).longValue();
                     String address = isOfInterest(addressOfInterestList, from, to, tokenTransactionsOnly);
-                    if (!address.isEmpty()) {
-                        if(to.isEmpty()) logger.info("line");
-                        ERC20Function df= InputDataField.parseDataField(data,functionMap);
-                        Transaction tx = new Transaction(from, to, val, gas_used, df, unixTime);
-
-                        tokenMap.get(address).addTransaction(tx, unixTime);
-                        if (address.equalsIgnoreCase(Params.userToUser)) {
-                            if(count++>500000){
-                                writeToFile(address, tokenMap.get(address).getTransactions());
-                                tokenMap.get(address).clearTransactions();
-                                count=0;
-                            }
-                        }
-                    }
+                    count = getCount(tokenMap, functionMap, count, from, data, to, gas_used, val, unixTime, address);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private static int getCount(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, int count, String from, String data, String to, BigInteger gas_used, BigInteger val, long unixTime, String address) {
+        if (!address.isEmpty()) {
+            if (to.isEmpty()) logger.info("line");
+            ERC20Function df = InputDataField.parseDataField(data, functionMap);
+            Transaction tx = new Transaction(from, to, val, gas_used, df, unixTime);
+
+            tokenMap.get(address).addTransaction(tx, unixTime);
+            if (address.equalsIgnoreCase(Params.userToUser)) {
+                if (count++ > 500000) {
+                    writeToFile(address, tokenMap.get(address).getTransactions());
+                    tokenMap.get(address).clearTransactions();
+                    count = 0;
+                }
+            }
+        }
+        return count;
     }
 
 
@@ -184,7 +189,8 @@ public class TokenFiltering {
         }
         return address;
     }
-    private static void printFunctionOcc() {
+
+    public static void printFunctionOcc() {
         Map<String, Integer> occMap = ERC20Function.getOccMap();
         for(String funcCodeString: occMap.keySet()) {
 
