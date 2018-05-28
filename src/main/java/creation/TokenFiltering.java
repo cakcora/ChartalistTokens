@@ -25,12 +25,12 @@ import java.util.Set;
 
 public class TokenFiltering {
     private static final Logger logger = LoggerFactory.getLogger(TokenFiltering.class);
-
+    private static int fileCount = 50;
     public static void main(String args[]) throws Exception {
 
 
         FileUtils.cleanDirectory(new File(Params.tokenFilesDir));
-        Map<String, Contract> tokenMap = Contract.readTopTokens(200);
+        Map<String, Contract> tokenMap = Contract.readTopTokens();
 
         Map<String, ERC20Function> functionMap = ERC20Function.readERC20Functions();
 
@@ -39,58 +39,26 @@ public class TokenFiltering {
         for (Contract token : tokenMap.values()) {
             addressOfInterestList.add(token.getContractAddress());
         }
-        Set<String> userAddressesinTransactions = new HashSet<String>();
-        boolean[] wave = new boolean[]{true,false};
-        for(boolean tokenTransactionsOnly : wave){
-            if(tokenTransactionsOnly){
-                logger.info("Searching the Ethereum user to token transactions only");
-            }
-            else{
-                if(userAddressesinTransactions.isEmpty()){
-                    throw new Exception("No user address was found.");
-                }
-                addressOfInterestList = userAddressesinTransactions;
-                logger.info("Searching the Ethereum user to user transactions");
-            }
-            readFiles(tokenMap, functionMap, addressOfInterestList, tokenTransactionsOnly);
+        logger.info("Searching the Ethereum user to token transactions only");
+        readFiles(tokenMap, functionMap, addressOfInterestList, true);
+        saveRemainingTransactions(tokenMap);
 
-            userAddressesinTransactions = parseTransactions(tokenMap, tokenTransactionsOnly);
-            printFunctionParamOcc();
+        printFunctionParamOcc();
+        printFunctionOcc();
 
-            printFunctionOcc();
-
-            // delete token transactions from memory
-            tokenMap.clear();
-            //in the next step we are interested in user to user transactions.
-            tokenMap.put(Params.userToUser, new Contract(Params.userToUser));
-        }
     }
 
 
-
-    private static Set<String> parseTransactions(Map<String, Contract> tokenMap, boolean tokenTransactionsOnly) {
-        Set<String> userAddressesinTransactions = new HashSet<>();
+    private static void saveRemainingTransactions(Map<String, Contract> tokenMap) {
         for(Contract token: tokenMap.values()){
-            String name = token.getShortName();
+            String shortName = token.getShortName();
             long count = token.getTxCount();
-            if(count>=1){
-                printDailyOcc(token, name, count);
-
-                //get userAddressesofthisToken and write them to a file.
-                Set<String> userAddressesofthisToken = new HashSet<>();
+            if (count > 0) {
+                printDailyOcc(token, shortName, count);
                 List<Transaction> transactions = token.getTransactions();
-                writeToFile(token.getShortName(), transactions);
-
-                if(tokenTransactionsOnly){
-                    for(Transaction tx: transactions){
-                        userAddressesofthisToken.addAll(tx.getAllAddresses());
-                    }
-                    userAddressesinTransactions.addAll(userAddressesofthisToken);
-                    //write all token transactions
-                }
+                writeToFile(shortName, transactions);
             }
         }
-        return userAddressesinTransactions;
     }
 
     private static void printDailyOcc(Contract token, String name, long count) {
@@ -114,8 +82,8 @@ public class TokenFiltering {
 
     static void readFiles(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, Set<String> addressOfInterestList, boolean tokenTransactionsOnly) throws IOException {
         String line;
-        int count =0;
-        for (int i = 1; i <= 50; i++) {
+
+        for (int i = fileCount; i > 0; i--) {
             BufferedReader br = new BufferedReader(new FileReader(Params.dir + i + ".csv"));
             br.readLine();
             logger.info("parsing " +i+ ".csv");
@@ -129,30 +97,29 @@ public class TokenFiltering {
                     BigInteger val = Numeric.toBigInt(arr[5]);
                     long unixTime = Numeric.toBigInt(arr[9]).longValue();
                     String address = isOfInterest(addressOfInterestList, from, to, tokenTransactionsOnly);
-                    count = getCount(tokenMap, functionMap, count, from, data, to, gas_used, val, unixTime, address);
+                    saveTransaction(tokenMap, functionMap, from, data, to, gas_used, val, unixTime, address);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+
         }
     }
 
-    private static int getCount(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, int count, String from, String data, String to, BigInteger gas_used, BigInteger val, long unixTime, String address) {
+    private static void saveTransaction(Map<String, Contract> tokenMap, Map<String, ERC20Function> functionMap, String from, String data, String to, BigInteger gas_used, BigInteger val, long unixTime, String address) {
         if (!address.isEmpty()) {
             if (to.isEmpty()) logger.info("line");
             ERC20Function df = InputDataField.parseDataField(data, functionMap);
             Transaction tx = new Transaction(from, to, val, gas_used, df, unixTime);
 
-            tokenMap.get(address).addTransaction(tx, unixTime);
-            if (address.equalsIgnoreCase(Params.userToUser)) {
-                if (count++ > 500000) {
-                    writeToFile(address, tokenMap.get(address).getTransactions());
-                    tokenMap.get(address).clearTransactions();
-                    count = 0;
-                }
+            Contract token = tokenMap.get(address);
+            token.addTransaction(tx, unixTime);
+            List<Transaction> transactions = token.getTransactions();
+            if (transactions.size() > 15000) {
+                writeToFile(token.getShortName(), transactions);
+                token.clearTransactions();
             }
         }
-        return count;
     }
 
 

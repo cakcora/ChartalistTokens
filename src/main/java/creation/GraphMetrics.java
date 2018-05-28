@@ -1,16 +1,14 @@
 package creation;
 
-import algorithms.KCore;
 import edu.uci.ics.jung.algorithms.metrics.Metrics;
 import edu.uci.ics.jung.algorithms.metrics.TriadicCensus;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import params.Params;
-import structure.Core;
 import utils.Files;
 
 import java.io.BufferedReader;
@@ -31,13 +29,32 @@ public class GraphMetrics {
 
         List<String> files = Files.getTokenFiles(Params.graphFilesDir);
         files.remove(Params.userToUser + ".txt");
-        String fileName = "metrics.txt";
+        files.remove("networkeosTX.txt");
+        files.remove("networkomisegoTX.txt");
+        files.remove("networktronixTX.txt");
+        files.remove("networkgolemTX.txt");
+        files.remove("networklogarithmTX.txt");
+        files.remove("networkstorjTX.txt");
+        String fileName = "motifs.txt";
         files.remove(fileName);
+
         BufferedWriter wr = new BufferedWriter(new FileWriter(Params.graphFilesDir + fileName));
+        String doneFile = "doneList.txt";
+        BufferedReader done = new BufferedReader(new FileReader(Params.graphFilesDir + doneFile));
+        String h = "";
+        files.remove(doneFile);
+        files.remove("motifsSoFar.txt");
+        logger.info(files.toString());
+        while ((h = done.readLine()) != null) {
+            if (files.contains(h)) {
+                files.remove(h);
+                logger.info(h + " already computed.");
+            }
+        }
         for (String file : files) {
             //String file = "networkraidenTX.txt";
             BufferedReader br = new BufferedReader(new FileReader(Params.graphFilesDir + file));
-            Map<Integer, Map<Integer, DirectedSparseMultigraph>> graphMap = new TreeMap<>();
+            Map<Integer, Map<Integer, DirectedSparseGraph>> graphMap = new TreeMap<>();
             int granularity = 7;
 
             String line = "";
@@ -67,14 +84,15 @@ public class GraphMetrics {
                     edgeSize += t.getEdgeCount();
 
                     String motifs = getMotifs(t);
-                    String coeffs = getCoefficients(t);
-                    KCore kCore = new KCore();
-                    Core core = kCore.findCore(t);
-                    String cores = core.toString();
+                    //String coeffs = getCoefficients(t);
+                    //KCore kCore = new KCore();
+                    //Core core = kCore.findCore(t);
+                    // String cores = core.toString();
 //                logger.info(core.getCoreNumber()+"");
-                    String s1 = file + "\t" + g + "\t" + g2 + "\t" + t.getVertexCount() + "\t" + t.getEdgeCount() + "\t" + motifs + coeffs + core.getCoreNumber() + "\t" + cores;
+                    String s1 = file + "\t" + g + "\t" + g2 + "\t" + t.getVertexCount() + "\t" + t.getEdgeCount() + motifs;
                     logger.info(s1);
                     wr.write(s1 + "\r\n");
+                    wr.flush();
                 }
                 s += graphMap.get(g).size();
             }
@@ -105,9 +123,9 @@ public class GraphMetrics {
         return q;
     }
 
-    private static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseMultigraph>> gm, int year, int tp) {
+    private static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {
         if (!gm.containsKey(year)) gm.put(year, new TreeMap<>());
-        if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseMultigraph<>());
+        if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseGraph<>());
         return gm.get(year).get(tp);
     }
 

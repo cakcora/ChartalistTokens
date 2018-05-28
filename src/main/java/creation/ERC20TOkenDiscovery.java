@@ -88,7 +88,7 @@ public class ERC20TOkenDiscovery {
         TokenFiltering.printFunctionOcc();
         TokenFiltering.printFunctionParamOcc();
 
-        TokenGraph.printUnknownTokens(counts, 500);
+        TokenGraph.printUnknownTokens(counts, 1000);
         logger.info("transactions in time");
         printDailyTransactions(txMapInTime);
         logger.info("erc20 first tx in time");

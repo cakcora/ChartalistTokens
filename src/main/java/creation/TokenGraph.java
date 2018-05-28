@@ -36,14 +36,14 @@ public class TokenGraph {
         for (String f : files) {
             readFiles(tokenMap, Params.tokenFilesDir, f);
         }
-        printUnknownTokens(unknownTokens, 500);
+        printUnknownTokens(unknownTokens, 1000);
         printNodeIds(Params.graphFilesDir);
     }
 
     private static void writeEdges(String graphFilesDir, String f, List<TWEdge> edges) throws IOException {
         BufferedWriter wr = new BufferedWriter(new FileWriter(graphFilesDir + "network" + f, true));
         for (TWEdge edge : edges) {
-            if (edge.hasTransferredValue()) {
+            if (edge.hasTransferredTokenValue()) {
                 wr.write(edge.toTDAEdge() + "\r\n");
             }
         }
@@ -54,6 +54,7 @@ public class TokenGraph {
 
         BufferedReader br = new BufferedReader(new FileReader(dir + filename));
 
+        int stdEtherTxLength = 5;
         logger.info("parsing " + filename);
         List<TWEdge> edges = new ArrayList<>();
         String line;
@@ -65,12 +66,11 @@ public class TokenGraph {
                 long unixTime = Long.parseLong(arr[0]);
                 int fromID = getId(arr[1].trim());
                 String to = arr[2].trim();
-                BigInteger gas_used = new BigInteger(arr[3]);
                 BigInteger ethValue = new BigInteger(arr[4]);
-                if (arr.length == 5) {
+                if (arr.length == stdEtherTxLength) {
                     int toID = getId(to);
                     edge = new TWEdge(unixTime, fromID, toID, ethValue);
-                } else if (arr.length > 5) {
+                } else if (arr.length > stdEtherTxLength) {
                     //has a function
                     String tokenName;
                     Contract contract;
@@ -81,14 +81,12 @@ public class TokenGraph {
                         tokenName = to;
                         addtoUnknownTokens(tokenName);
                     }
-                    int toId = getId(to);
-                    edge = getTWEdge(arr, tokenName);
+                    edge = getTWEdge(arr, nodeIds, tokenName);
                 }
                 edges.add(edge);
-                if (count > 400000) {
+                if (edges.size() > 400000) {
                     writeEdges(Params.graphFilesDir, filename, edges);
                     edges.clear();
-                    count = 0;
                 }
 
             } catch (Exception e) {
@@ -100,7 +98,7 @@ public class TokenGraph {
         return;
     }
 
-    private static int getId(String address) {
+    public static int getId(String address) {
         if (!nodeIds.containsKey(address)) {
             nodeIds.put(address, count);
             count++;
@@ -115,7 +113,30 @@ public class TokenGraph {
         unknownTokens.put(tokenName, 1 + unknownTokens.get(tokenName));
     }
 
-    private static TWEdge getTWEdge(String[] arr, String tokenName) {
+
+    private static void printNodeIds(String graphFilesDir) throws IOException {
+        logger.info("Printing out node ids");
+        BufferedWriter wr = new BufferedWriter(new FileWriter(graphFilesDir + "NodeIds.txt"));
+        for (String to : nodeIds.keySet()) {
+            Integer integer = nodeIds.get(to);
+            wr.write(integer + " " + to + "\r\n");
+        }
+        wr.close();
+    }
+
+    static void printUnknownTokens(Map<String, Integer> tokens, int limit) {
+        if (!tokens.isEmpty())
+            logger.info("These addresses belong to tokens that we do not know.");
+        for (String to : tokens.keySet()) {
+            Integer integer = tokens.get(to);
+            if (integer > limit) {
+                logger.info(to + ":" + integer);
+            }
+        }
+    }
+
+
+    public static TWEdge getTWEdge(String[] arr, Map<String, Integer> nodeIds, String tokenName) {
 
         String functionName = arr[5];
         long unixTime = Long.parseLong(arr[0]);
@@ -160,31 +181,6 @@ public class TokenGraph {
                 logger.error(functionName + " parameters are unknown.");
             }
         }
-
         return new TWEdge(unixTime, getId(from), getId(to), ethValue, tokenName, tokenValue);
     }
-
-
-    private static void printNodeIds(String graphFilesDir) throws IOException {
-        logger.info("Printing out node ids");
-        BufferedWriter wr = new BufferedWriter(new FileWriter(graphFilesDir + "NodeIds.txt"));
-        for (String to : nodeIds.keySet()) {
-            Integer integer = nodeIds.get(to);
-            wr.write(integer + " " + to + "\r\n");
-        }
-        wr.close();
-    }
-
-    static void printUnknownTokens(Map<String, Integer> tokens, int limit) {
-        if (!tokens.isEmpty())
-            logger.info("These addresses belong to tokens that we do not know.");
-        for (String to : tokens.keySet()) {
-            Integer integer = tokens.get(to);
-            if (integer > limit) {
-                logger.info(to + ":" + integer);
-            }
-        }
-    }
-
-
 }
