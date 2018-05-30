@@ -6,7 +6,7 @@ package params;
  *
  */
 public class Params {
-
+    public static String d = "D:/Ethereum/";
     public static String dir = "D:/Ethereum/fromVadim/";
     public static boolean countPerDay = true;
     public static boolean storeContractTransactions = true;

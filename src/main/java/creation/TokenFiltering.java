@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class TokenFiltering {
     private static final Logger logger = LoggerFactory.getLogger(TokenFiltering.class);
-    private static int fileCount = 50;
+    private static int fileCount = 56;
     public static void main(String args[]) throws Exception {
 
 
@@ -45,6 +45,7 @@ public class TokenFiltering {
 
         printFunctionParamOcc();
         printFunctionOcc();
+        logger.warn("These param and function counts that this class may output are not the whole ERC20 ecosystem. There are some tokens that had few transactions, so their data is not here. Check ERC20TOkenDiscovery class for complete numbers.");
 
     }
 
@@ -115,7 +116,7 @@ public class TokenFiltering {
             Contract token = tokenMap.get(address);
             token.addTransaction(tx, unixTime);
             List<Transaction> transactions = token.getTransactions();
-            if (transactions.size() > 15000) {
+            if (transactions.size() > 5000) {
                 writeToFile(token.getShortName(), transactions);
                 token.clearTransactions();
             }

@@ -30,9 +30,7 @@ public class KCore {
         graph.addEdge(4, 2, 3);
         graph.addEdge(5, 5, 3);
         graph.addEdge(6, 6, 5);
-        Core core = new KCore().findCore(graph);
-        double set = core.findIntersection(core, 1);
-        logger.info(set + "");
+
 
     }
 
@@ -68,7 +66,6 @@ public class KCore {
                 newGraph.addEdge(eCount++, node, ne);
             }
         }
-//        logger.warn("Changing graph type to undirected before kcore computations.");
         return findCore(newGraph);
     }
 
@@ -83,12 +80,10 @@ public class KCore {
             if (nodeSets.containsKey(1)) stepSize = 1;
             if (nodeSets.containsKey(stepSize)) {
                 kSoFar += stepSize;
-//               logger.info("k:"+kSoFar+" step"+stepSize);
                 for (int node : nodeSets.get(stepSize)) {
                     ArrayList<Integer> g = new ArrayList<Integer>(graph.getNeighbors(node));
                     for (int e = 0; e < stepSize && e < g.size(); e++) {
                         Integer remove = g.get(e);
-//                        logger.info(node+" removing edge to "+remove);
                         nodeDeg.put(remove, nodeDeg.get(remove) - 1);
                         graph.removeEdge(graph.findEdge(node, remove));
                     }
@@ -96,10 +91,8 @@ public class KCore {
                 }
                 List<Integer> deletedNodes = updateDegrees(nodeDeg, nodeSets, graph);
                 core.addToCore(kSoFar, deletedNodes);
-//                logger.info(nodeDeg.toString()+degrees.toString());
             } else {
                 stepSize++;
-//                logger.info("increasing step size to "+stepSize);
             }
 
             if (nodeSets.isEmpty()) break;
