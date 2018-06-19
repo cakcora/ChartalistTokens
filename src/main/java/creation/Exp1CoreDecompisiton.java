@@ -1,9 +1,10 @@
 package creation;
 
-import algorithms.KCore;
+import algorithms.UndirectedKCore;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import org.apache.commons.math3.stat.Frequency;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -31,11 +32,18 @@ public class Exp1CoreDecompisiton {
         BufferedWriter wr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + coreFile));
         BufferedWriter bwr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + tokenbehaviorFile));
         wr.write("token\tyear\tperiod\tnodes\tnewnodes\tedges\tretention1\tretention3\tretention6\tdegeneracy");
+        bwr.write("token\tmeanselltime\ticosale\tbuynosale\ticoandbuyssells\tt0\tt1\tt3\tt7\tt15\tt30\tt60\tn\tvariance\tskew\tkurtosis\tmedianselltime");
         int maxCore = 10;
         for (int i = 1; i <= maxCore; i++) {
             wr.write("\tc" + i);
         }
+        for (int i = 0; i < maxCore; i++) {
+            for (int j = 0; j < maxCore; j++) {
+                bwr.write("\tm" + i + "" + j);
+            }
+        }
         wr.write("\r\n");
+        bwr.write("\r\n");
         int granularity = Granularity.DAY;
 
 
@@ -49,7 +57,7 @@ public class Exp1CoreDecompisiton {
             Map<Integer, List<Integer>> sellers = new HashMap<Integer, List<Integer>>();
             for (int g : graphMap.keySet()) {
                 for (int g2 : graphMap.get(g).keySet()) {
-                    int countInvestors = buyers.size();
+                    int previousInvestorCount = buyers.size();
                     DirectedGraph grapht1 = graphMap.get(g).get(g2);
 
                     int txCount = grapht1.getEdgeCount();
@@ -66,8 +74,8 @@ public class Exp1CoreDecompisiton {
                         buyers.get(investor).add(period);
                         sellers.get(seller).add(period);
                     }
-                    KCore kCore = new KCore();
-                    Core core = kCore.findCore(grapht1);
+                    UndirectedKCore undirectedKCore = new UndirectedKCore();
+                    Core core = undirectedKCore.findCore(grapht1);
                     if (!coreMap.containsKey(g)) coreMap.put(g, new HashMap<>());
                     coreMap.get(g).put(g2, core);
                     String cores = core.toString(maxCore);
@@ -98,17 +106,25 @@ public class Exp1CoreDecompisiton {
                     retention6 = retention6 / i1;
 
 
-                    int investorCount = grapht1.getVertexCount();
-                    int countNewInvestors = buyers.size() - countInvestors;
-                    String infoString = file + "\t" + g + "\t" + g2 + "\t" + investorCount + "\t" + countNewInvestors + "\t" + txCount + "\t" + retention1 + "\t" + retention3 + "\t" + retention6 + "\t" + core.getCoreNumber() + "\t" + cores;
+                    int marketparticipants = grapht1.getVertexCount();
+                    int allBuyers = buyers.size();
+                    int newInvestorCount = allBuyers - previousInvestorCount;
+                    String infoString = file + "\t" + g + "\t" + g2 + "\t" + marketparticipants +
+                            "\t" + newInvestorCount + "\t" + txCount + "\t" + retention1 + "\t" +
+                            retention3 + "\t" + retention6 + "\t" + core.getDegeneracy() + "\t" +
+                            cores;
                     sb.append(infoString + "\r\n");
+                    logger.info(infoString);
                 }
             }
 
             //buyer and seller
 
             DescriptiveStatistics firstSellStats = new DescriptiveStatistics();
-
+            Frequency freq = new Frequency();
+            int icosale = 0;
+            int buynosale = 0;
+            int icoandbuyssells = 0;
             int arr[][] = new int[maxCore][maxCore];
             for (int buyer : buyers.keySet()) {
                 List<Integer> bPeriods = buyers.get(buyer);
@@ -116,16 +132,18 @@ public class Exp1CoreDecompisiton {
                 if (bDim >= maxCore) bDim = maxCore - 1;
                 int sDim = 0;
                 if (sellers.containsKey(buyer)) {
-                    //bough and sold
+                    //bought and sold
                     List<Integer> sPeriods = sellers.get(buyer);
-                    //logger.info(bPeriods.toString()+" "+ sPeriods.toString());
 
                     int firstBuy = bPeriods.get(0);
                     int firstSell = sPeriods.get(0);
                     if (firstSell < firstBuy) {
                         //selling from ico
+                        icoandbuyssells++;
                     } else {
                         firstSellStats.addValue(firstSell - firstBuy);
+                        freq.addValue(firstSell - firstBuy);
+
                     }
 
 
@@ -135,6 +153,7 @@ public class Exp1CoreDecompisiton {
 
                 } else {
                     //bought and did not sell
+                    buynosale++;
                 }
                 arr[bDim][sDim]++;
             }
@@ -144,6 +163,7 @@ public class Exp1CoreDecompisiton {
                 int sp = sellers.get(seller).size();
                 if (sp >= maxCore) sp = maxCore - 1;
                 arr[0][sp]++;
+                icosale++;
             }
             StringBuffer matrixInfo = new StringBuffer();
             for (int buyDim = 0; buyDim < maxCore; buyDim++) {
@@ -153,7 +173,25 @@ public class Exp1CoreDecompisiton {
                 }
             }
             double time = firstSellStats.getMean();
-            bwr.write(file + "\t" + time + "\t" + matrixInfo + "\r\n");
+            long n = firstSellStats.getN();
+            double med = firstSellStats.getPercentile(50);
+            double variance = firstSellStats.getVariance();
+            double skew = firstSellStats.getSkewness();
+            double kurtosis = firstSellStats.getKurtosis();
+
+
+            long tarr[] = new long[7];
+            tarr[0] = freq.getCumFreq(0);
+            tarr[1] = freq.getCumFreq(1);
+            tarr[2] = freq.getCumFreq(3);
+            tarr[3] = freq.getCumFreq(7);
+            tarr[4] = freq.getCumFreq(15);
+            tarr[5] = freq.getCumFreq(30);
+            tarr[6] = freq.getCumFreq(60);
+
+            bwr.write(file + "\t" + time + "\t" + icosale + "\t" + buynosale + "\t" + icoandbuyssells +
+                    "\t" + tarr[0] + "\t" + tarr[1] + "\t" + tarr[2] + "\t" + tarr[3] + "\t" + tarr[4] + "\t" + tarr[5] + "\t" + tarr[6] + "\t" +
+                    n + "\t" + variance + "\t" + skew + "\t" + kurtosis + "\t" + matrixInfo + "\r\n");
             bwr.flush();
             wr.write(sb.toString());
             wr.flush();

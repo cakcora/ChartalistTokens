@@ -42,7 +42,7 @@ public class Contract {
             String line = br.readLine();//read header
             int i = 0;
             while ((line = br.readLine()) != null) {
-                String arr[] = line.toLowerCase().split(",");
+                String arr[] = line.toLowerCase().split("\t");
                 Contract contract = new Contract(arr[1], arr[2], arr[3]);
                 myMap.put(contract.getContractAddress(), contract);
                 if (++i >= top) {

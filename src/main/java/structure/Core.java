@@ -14,7 +14,9 @@ public class Core {
     }
 
     public void addToCore(int k, List<Integer> kCoreNodes) {
+        if (!core.containsKey(k))
         core.put(k, new HashSet<Integer>(kCoreNodes));
+        else core.get(k).addAll(kCoreNodes);
         if (max < k) max = k;
     }
 
@@ -43,11 +45,12 @@ public class Core {
         return 100.0 * (intersection.size() / (double) k1.size());
     }
 
-    private Set<Integer> getK(int k) {
+    public Set<Integer> getCoreK(int k) {
+        if (!this.core.containsKey(k)) return new HashSet<>();
         return this.core.get(k);
     }
 
-    public int getCoreNumber() {
+    public int getDegeneracy() {
         return max;
     }
 
