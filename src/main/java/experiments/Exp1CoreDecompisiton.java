@@ -1,4 +1,4 @@
-package creation;
+package experiments;
 
 import algorithms.UndirectedKCore;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -250,8 +250,8 @@ public class Exp1CoreDecompisiton {
             long unixTime = Long.parseLong(arr[2]);
             DateTime time = new DateTime(1000 * unixTime);
             int year = time.year().get();
-            int timePeriod = getPeriod(granularity, time);
-            Graph graph = getGraph(graphMap, year, timePeriod);
+            int timePeriod = computePeriod(granularity, time);
+            Graph graph = locateGraph(graphMap, year, timePeriod);
             graph.addVertex(node1);
             graph.addVertex(node2);
             graph.addEdge(graph.getEdgeCount(), node1, node2);
@@ -261,13 +261,13 @@ public class Exp1CoreDecompisiton {
     }
 
 
-    private static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseMultigraph>> gm, int year, int tp) {
+    static Graph locateGraph(Map<Integer, Map<Integer, DirectedSparseMultigraph>> gm, int year, int tp) {
         if (!gm.containsKey(year)) gm.put(year, new TreeMap<>());
         if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseMultigraph<>());
         return gm.get(year).get(tp);
     }
 
-    private static int getPeriod(int granularity, DateTime time) {
+    static int computePeriod(int granularity, DateTime time) {
         if (granularity == Granularity.DAY) return time.getDayOfYear();
         if (granularity == Granularity.WEEK) return time.getWeekOfWeekyear();
         if (granularity == Granularity.MONTH) return time.getMonthOfYear();

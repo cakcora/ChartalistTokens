@@ -1,6 +1,5 @@
-package creation;
+package experiments;
 
-import edu.uci.ics.jung.algorithms.metrics.TriadicCensus;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -50,8 +49,8 @@ public class Exp2CoralMotifs {
                 long unixTime = Long.parseLong(arr[2]);
                 DateTime time = new DateTime(1000 * unixTime);
                 int year = time.year().get();
-                int timePeriod = getPeriod(granularity, time);
-                Graph graph = getGraph(graphMap, year, timePeriod);
+                int timePeriod = Exp1CoreDecompisiton.computePeriod(granularity, time);
+                Graph graph = Exp1CoreDecompisiton.locateGraph(graphMap, year, timePeriod);
                 graph.addVertex(node1);
                 graph.addVertex(node2);
                 TWEdge edge = new TWEdge(unixTime, node1, node2, new BigInteger(arr[3]));
@@ -65,46 +64,11 @@ public class Exp2CoralMotifs {
             logger.info(file + " has " + globalGraph.getVertexCount() + " vertices and " + globalGraph.getEdgeCount());
 
 
-            int s = 0;
-            int nodeSize = 0;
-            int edgeSize = 0;
-            for (int g : graphMap.keySet()) {
-                for (int g2 : graphMap.get(g).keySet()) {
-                    DirectedGraph t = graphMap.get(g).get(g2);
-                    nodeSize += t.getVertexCount();
-                    edgeSize += t.getEdgeCount();
 
-                    String motifs = getMotifs(t);
-                    String s1 = file + "\t" + g + "\t" + g2 + "\t" + t.getVertexCount() + "\t" + t.getEdgeCount() + motifs;
-                    logger.info(s1);
-                    wr.write(s1 + "\r\n");
-                    wr.flush();
-                }
-                s += graphMap.get(g).size();
-            }
-            logger.info(nodeSize / (double) s + ", " + edgeSize / (double) s + ", " + s + " graphs were created for " + file);
         }
         wr.close();
     }
 
 
-    private static String getMotifs(DirectedGraph t) {
-        String q = "";
-        long[] triad_counts = new TriadicCensus().getCounts(t);
-        for (int d = 1; d <= 16; d++) q = q + "\t" + triad_counts[d];
-        return q;
-    }
 
-    private static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseMultigraph>> gm, int year, int tp) {
-        if (!gm.containsKey(year)) gm.put(year, new TreeMap<>());
-        if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseMultigraph<Integer, TWEdge>());
-        return gm.get(year).get(tp);
-    }
-
-    private static int getPeriod(int granularity, DateTime time) {
-        if (granularity == 1) return time.getDayOfYear();
-        if (granularity == 7) return time.getWeekOfWeekyear();
-        if (granularity == 31) return time.getMonthOfYear();
-        return -1;
-    }
 }
