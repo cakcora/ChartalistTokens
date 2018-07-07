@@ -47,7 +47,7 @@ public class AlphaCore {
                     a = a - stepSize;
                 }
                 alpha = a / 100d;
-                logger.info(alpha + " " + graph.getVertexCount() + "\t" + graph.getEdgeCount() + " " + nodes.size());
+                logger.info(alpha + " " + graph.getVertexCount() + "\t" + graph.getEdgeCount());
                 for (int i = 0; i < depths.length; i++) {
                     if (depths[i] >= alpha) {
                         coreVals.put(nodes.get(i), new Double[]{alpha, featureMap[i][0], featureMap[i][1]});
