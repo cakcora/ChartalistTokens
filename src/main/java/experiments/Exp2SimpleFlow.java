@@ -1,4 +1,4 @@
-package creation;
+package experiments;
 
 import edu.uci.ics.jung.algorithms.metrics.Metrics;
 import edu.uci.ics.jung.algorithms.metrics.TriadicCensus;
@@ -22,8 +22,8 @@ import java.util.TreeMap;
 /**
  * Created by cxa123230 on 4/28/2018.
  */
-public class GraphMetrics {
-    private static final Logger logger = LoggerFactory.getLogger(GraphMetrics.class);
+public class Exp2SimpleFlow {
+    private static final Logger logger = LoggerFactory.getLogger(Exp2SimpleFlow.class);
 
     public static void main(String args[]) throws Exception {
 
@@ -94,7 +94,7 @@ public class GraphMetrics {
         wr.close();
     }
 
-    private static String getCoefficients(DirectedGraph t) {
+    static String getCoefficients(DirectedGraph t) {
         String h = "";
         Map<Integer, Double> coeff = new Metrics().clusteringCoefficients(t);
         Map<Integer, Integer> ma = new TreeMap<>();
@@ -109,20 +109,20 @@ public class GraphMetrics {
     }
 
 
-    private static String getMotifs(DirectedGraph t) {
+    static String getMotifs(DirectedGraph t) {
         String q = "";
         long[] triad_counts = new TriadicCensus().getCounts(t);
         for (int d = 1; d <= 16; d++) q = q + "\t" + triad_counts[d];
         return q;
     }
 
-    private static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {
+    static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {
         if (!gm.containsKey(year)) gm.put(year, new TreeMap<>());
         if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseGraph<>());
         return gm.get(year).get(tp);
     }
 
-    private static int getPeriod(int granularity, DateTime time) {
+    static int getPeriod(int granularity, DateTime time) {
         if (granularity == 1) return time.getDayOfYear();
         if (granularity == 7) return time.getWeekOfWeekyear();
         if (granularity == 31) return time.getMonthOfYear();

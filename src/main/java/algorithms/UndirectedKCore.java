@@ -45,8 +45,6 @@ public class UndirectedKCore {
         int f = core.getDegeneracy();
         logger.info(core.getDegeneracy() + "");
         logger.info(core.getCoreK(4).toString());
-
-
     }
 
     private static List<Integer> updateDegreeSets(Map<Integer, HashSet<Integer>> nodeSets, UndirectedGraph<Integer, Integer> graph) {

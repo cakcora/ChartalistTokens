@@ -191,7 +191,7 @@ public class Exp1CoreDecompisiton {
 
             bwr.write(file + "\t" + time + "\t" + icosale + "\t" + buynosale + "\t" + icoandbuyssells +
                     "\t" + tarr[0] + "\t" + tarr[1] + "\t" + tarr[2] + "\t" + tarr[3] + "\t" + tarr[4] + "\t" + tarr[5] + "\t" + tarr[6] + "\t" +
-                    n + "\t" + variance + "\t" + skew + "\t" + kurtosis + "\t" + matrixInfo + "\r\n");
+                    n + "\t" + variance + "\t" + skew + "\t" + kurtosis + "\t" + med + "\t" + matrixInfo + "\r\n");
             bwr.flush();
             wr.write(sb.toString());
             wr.flush();

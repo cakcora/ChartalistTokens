@@ -9,87 +9,54 @@ import java.math.BigInteger;
 /**
  * Created by cxa123230 on 4/23/2018.
  */
-public class TWEdge {
+public class WeightedEdge {
     private static final Logger logger = LoggerFactory.getLogger(TokenFiltering.class);
     long unixTime;
-    BigInteger ethVal;
-    String tokenName = "NONE";
-    BigInteger tokenValue = new BigInteger("0");
-    int from;
-    int to;
+    BigInteger ethVal = new BigInteger("0");
+    BigInteger tokenValue;
+    int node;
+    int node2;
 
-    public TWEdge(long unixTime, int from, int to, BigInteger tokenValue) {
+    public WeightedEdge(long unixTime, BigInteger tokenValue, int from, int to) {
         this.unixTime = unixTime;
-        this.from = from;
-        this.to = to;
         if (tokenValue.compareTo(BigInteger.ZERO) < 0) {
             this.tokenValue = BigInteger.ZERO;
             logger.error("A token value of " + tokenValue.toString() + " has been passed as edge weight");
         } else this.tokenValue = tokenValue;
     }
 
-    public TWEdge(long unixTime, int from, int to, BigInteger ethValue, String tokenName, BigInteger tokenValue) {
+    public WeightedEdge(long unixTime, BigInteger ethValue, BigInteger tokenValue) {
         this.unixTime = unixTime;
         this.ethVal = ethValue;
-        this.from = from;
-        this.to = to;
-        this.tokenName = tokenName;
         this.tokenValue = tokenValue;
-
-    }
-
-    public int getFrom() {
-        return from;
-    }
-
-    public int getTo() {
-        return to;
     }
 
     @Override
     public String toString() {
-        return from +
-                " " + to +
-                " " + unixTime +
+        return unixTime +
                 " " + ethVal +
-                " " + tokenName +
                 " " + tokenValue
                 ;
     }
 
-    public String toTemporalMotifString() {
-        return from +
-                " " + to +
-                " " + unixTime
-                ;
-    }
 
     public String toTDAEdge() {
-        return from +
-                " " + to +
+        return
                 " " + unixTime +
-                " " + tokenValue
+                        " " + tokenValue
                 ;
     }
 
-
-    public boolean hasTransferredTokenValue() {
-        return !tokenValue.equals(BigInteger.ZERO);
-
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TWEdge twEdge = (TWEdge) o;
+        WeightedEdge twEdge = (WeightedEdge) o;
 
         if (unixTime != twEdge.unixTime) return false;
-        if (from != twEdge.from) return false;
-        if (to != twEdge.to) return false;
         if (ethVal != null ? !ethVal.equals(twEdge.ethVal) : twEdge.ethVal != null) return false;
-        if (tokenName != null ? !tokenName.equals(twEdge.tokenName) : twEdge.tokenName != null) return false;
         return tokenValue != null ? tokenValue.equals(twEdge.tokenValue) : twEdge.tokenValue == null;
 
     }
@@ -98,10 +65,7 @@ public class TWEdge {
     public int hashCode() {
         int result = (int) (unixTime ^ (unixTime >>> 32));
         result = 31 * result + (ethVal != null ? ethVal.hashCode() : 0);
-        result = 31 * result + (tokenName != null ? tokenName.hashCode() : 0);
         result = 31 * result + (tokenValue != null ? tokenValue.hashCode() : 0);
-        result = 31 * result + from;
-        result = 31 * result + to;
         return result;
     }
 
