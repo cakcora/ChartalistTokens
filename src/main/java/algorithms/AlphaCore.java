@@ -53,7 +53,7 @@ public class AlphaCore {
                         coreVals.put(nodes.get(i), new Double[]{alpha, featureMap[i][0], featureMap[i][1]});
                         if (graph.removeVertex(nodes.get(i)))
                             keepIterating = true;
-                        else logger.info("wtf" + nodes.get(i));
+                        else logger.error("Node is not in the graph. " + nodes.get(i));
                     }
                 }
                 for (Object o : graph.getVertices().toArray()) {

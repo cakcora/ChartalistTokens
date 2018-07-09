@@ -27,10 +27,9 @@ public class Exp1CoreDecompisiton {
 
         List<String> files = Files.getTokenFiles(Params.graphFilesDir);
         files.remove("NodeIds.txt");
-        String coreFile = "core.txt";
-        String tokenbehaviorFile = "investorBehavior.txt";
-        BufferedWriter wr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + coreFile));
-        BufferedWriter bwr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + tokenbehaviorFile));
+
+        BufferedWriter wr = new BufferedWriter(new FileWriter(Params.coreFile));
+        BufferedWriter bwr = new BufferedWriter(new FileWriter(Params.tokenbehaviorFile));
         wr.write("token\tyear\tperiod\tnodes\tnewnodes\tedges\tretention1\tretention3\tretention6\tdegeneracy");
         bwr.write("token\tmeanselltime\ticosale\tbuynosale\ticoandbuyssells\tt0\tt1\tt3\tt7\tt15\tt30\tt60\tn\tvariance\tskew\tkurtosis\tmedianselltime");
         int maxCore = 10;

@@ -42,7 +42,7 @@ public class EthrData2FinalFormat {
         }
         logger.info("Blocks: " + bMap.size());
         String form = "from,gas,gasprice,input,to,value,gas_used,miner,number,timestamp";
-        String fileName = Params.dir + (50 + fIndex) + ".csv";
+        String fileName = Params.vDir + (50 + fIndex) + ".csv";
         BufferedWriter wr = new BufferedWriter(new FileWriter(fileName));
         wr.append(form + "\r\n");
         StringBuffer sb = new StringBuffer();

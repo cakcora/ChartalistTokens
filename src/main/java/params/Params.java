@@ -7,20 +7,28 @@ package params;
  */
 public class Params {
     public static String d = "D:/Ethereum/";
-    public static String dir = "D:/Ethereum/fromVadim/";
+    public static String vDir = d + "fromVadim/";
     public static boolean countPerDay = true;
     public static boolean storeContractTransactions = true;
     public static String tokenInfoFile = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/data/top200Tokens.csv";
     public static String erc20FunctionsFile = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/data/erc20FunctionsFile.txt";
     public static int ercStandardFunctionLength = 10;
     public static int eth64 = 64;
-    public static String tokenFilesDir ="D:/Ethereum/tokens/";
+    public static String tokenFilesDir = d + "tokens/";
     public static int ethAddressPrecedingZeros = 24;
     public static String ethAddressPrecedingString = "0x";
 
 
-    public static String userToUser = "userToUser";
-    public static String graphFilesDir = "D:/Ethereum/graphs/";
-    public static String tmotifFilesDir = "D:/Ethereum/graphSamples/";
-    public static String ethrDir = "D:/Ethereum/fromR/";
+    public static String userToUserFile = "userToUserFile.txt";
+    public static String graphFilesDir = d + "graphs/";
+    public static String tmotifFilesDir = d + "graphSamples/";
+    public static String ethrDir = d + "fromR/";
+
+    public static String coreFile = d + "experiments/" + "core.txt";
+    public static String tokenbehaviorFile = d + "experiments/" + "investorBehavior.txt";
+
+    public static String simpleFlowFile = d + "experiments/" + "FlowMotifs.txt";
+
+    public static String alphaCoreFile = d + "experiments/" + "alphaCoral.txt";
+    public static String coralFlowFile = d + "experiments/" + "alphaCoralFlows.txt";
 }

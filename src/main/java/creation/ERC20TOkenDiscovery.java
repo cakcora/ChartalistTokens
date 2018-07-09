@@ -35,7 +35,7 @@ public class ERC20TOkenDiscovery {
         Map<String, ERC20Function> functionMap = ERC20Function.readERC20Functions();
         Map<String, Integer> counts = new HashMap<String, Integer>();
         for (int i = 1; i <= 56; i++) {
-            BufferedReader br = new BufferedReader(new FileReader(Params.dir + i + ".csv"));
+            BufferedReader br = new BufferedReader(new FileReader(Params.vDir + i + ".csv"));
             String line = br.readLine();
             logger.info("parsing " + i + ".csv");
             while ((line = br.readLine()) != null) {

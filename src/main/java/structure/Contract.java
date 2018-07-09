@@ -6,10 +6,7 @@ import params.Params;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by cxa123230 on 4/16/2018.
@@ -54,6 +51,28 @@ public class Contract {
         }
         return myMap;
     }
+
+    public static Set<String> readTopTokensNames(int top) throws Exception {
+        if (top <= 0) throw new Exception(top + " tokens requested. ");
+        Set<String> mySet = new HashSet<String>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(Params.tokenInfoFile));
+            String line = br.readLine();//read header
+            int i = 0;
+            while ((line = br.readLine()) != null) {
+                String arr[] = line.toLowerCase().split("\t");
+                Contract contract = new Contract(arr[1], arr[2], arr[3]);
+                mySet.add(contract.getShortName());
+                if (++i >= top) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return mySet;
+    }
+
 
     public static Map<String, Contract> readTopTokens() throws Exception {
         return readTopTokens(Integer.MAX_VALUE);

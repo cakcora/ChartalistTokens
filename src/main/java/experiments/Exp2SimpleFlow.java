@@ -28,11 +28,10 @@ public class Exp2SimpleFlow {
     public static void main(String args[]) throws Exception {
 
         List<String> files = Files.getTokenFiles(Params.graphFilesDir);
-        files.remove(Params.userToUser + ".txt");
-        String fileName = "FlowMotifs.txt";
-        files.remove(fileName);
+        files.remove(Params.userToUserFile);
+        files.remove(Params.simpleFlowFile);
 
-        BufferedWriter wr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + fileName));
+        BufferedWriter wr = new BufferedWriter(new FileWriter(Params.simpleFlowFile));
 //        String doneFile = "doneList.txt";
 //        BufferedReader done = new BufferedReader(new FileReader(Params.graphFilesDir + doneFile));
 //        String h = "";

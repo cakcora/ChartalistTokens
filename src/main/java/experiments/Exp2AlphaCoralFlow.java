@@ -1,6 +1,5 @@
 package experiments;
 
-import algorithms.AlphaCore;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -9,29 +8,33 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import params.Params;
+import structure.Contract;
 import structure.TWEdge;
 import utils.Files;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 
-public class Exp2CoralFlow {
-    private static final Logger logger = LoggerFactory.getLogger(Exp2CoralFlow.class);
+public class Exp2AlphaCoralFlow {
+    private static final Logger logger = LoggerFactory.getLogger(Exp2AlphaCoralFlow.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         int granularity = 1;
-        BufferedWriter wr = new BufferedWriter(new FileWriter(Params.d + "experiments/" + "coral.txt"));
-        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.d + "experiments/" + "coralFlows.txt"));
-        wr.write("token\tnode\tcoreVal\tedgefactor\tweightfactor\r\n");
-        List<String> files = Files.getTokenFiles(Params.graphFilesDir);
-        for (String tokenFileName : files) {
+        Set<String> tokenMap = Contract.readTopTokensNames(5);
 
+        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.coralFlowFile));
+        List<String> tokenGraphFiles = Files.getTokenFiles(Params.graphFilesDir);
+
+
+        for (String tokenFileName : tokenGraphFiles) {
+            logger.info(tokenFileName);
             String token = tokenFileName.substring(7, tokenFileName.length() - 6);
+            if (!tokenMap.contains(token)) continue;
             DirectedSparseMultigraph globalGr = new DirectedSparseMultigraph();
             Map<Integer, Map<Integer, DirectedSparseGraph>> graphMap = new TreeMap<>();
             BufferedReader br = new BufferedReader(new FileReader(Params.graphFilesDir + tokenFileName));
@@ -56,11 +59,8 @@ public class Exp2CoralFlow {
             }
 
 
-            Map<Integer, Double[]> corevalMap = new AlphaCore().findAlphaCoreValues(globalGr);
-            for (int x : corevalMap.keySet()) {
-                Double[] doubles = corevalMap.get(x);
-                wr.write(token + "\t" + x + "\t" + doubles[0] + "\t" + doubles[1] + "\t" + doubles[2] + "\r\n");
-            }
+            Map<Integer, Double[]> corevalMap = new HashMap<>();
+
             //for(int i=10;i>0;i=i-2)
             {
                 final double coralK = 2 / 10d;
@@ -96,7 +96,6 @@ public class Exp2CoralFlow {
                 }
             }
         }
-        wr.close();
         wr2.close();
     }
 

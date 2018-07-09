@@ -85,7 +85,7 @@ public class TokenFiltering {
         String line;
 
         for (int i = fileCount; i > 0; i--) {
-            BufferedReader br = new BufferedReader(new FileReader(Params.dir + i + ".csv"));
+            BufferedReader br = new BufferedReader(new FileReader(Params.vDir + i + ".csv"));
             br.readLine();
             logger.info("parsing " +i+ ".csv");
             while ((line = br.readLine()) != null) {
@@ -152,7 +152,7 @@ public class TokenFiltering {
         } else {
             //searching for user to user transactions
             if (addresses.contains(from) & addresses.contains(to)) {
-                return Params.userToUser;
+                return Params.userToUserFile;
             }
         }
         return address;
