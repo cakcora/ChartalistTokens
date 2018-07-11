@@ -4,6 +4,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,7 @@ import structure.Contract;
 import structure.TWEdge;
 import utils.Files;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -26,15 +24,19 @@ public class Exp2AlphaCoralFlow {
     public static void main(String[] args) throws Exception {
         int granularity = 1;
         Set<String> tokenMap = Contract.readTopTokensNames(5);
-
-        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.coralFlowFile));
+        int topCore = 5;
+//        tokenMap = new HashSet<>(); tokenMap.add("ades"); tokenMap.add("aion");tokenMap.add("aragon");
         List<String> tokenGraphFiles = Files.getTokenFiles(Params.graphFilesDir);
-
-
+        tokenGraphFiles.remove(Params.userToUserFile);
+        tokenGraphFiles.remove(Params.nodeIdsFile);
+        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.coralFlowFile));
         for (String tokenFileName : tokenGraphFiles) {
-            logger.info(tokenFileName);
+
             String token = tokenFileName.substring(7, tokenFileName.length() - 6);
             if (!tokenMap.contains(token)) continue;
+
+            Set<Integer> corevalMap = readTokenCore(token, Params.alphaCoreDir, topCore);
+            logger.info(token + " has " + corevalMap.size() + " nodes.");
             DirectedSparseMultigraph globalGr = new DirectedSparseMultigraph();
             Map<Integer, Map<Integer, DirectedSparseGraph>> graphMap = new TreeMap<>();
             BufferedReader br = new BufferedReader(new FileReader(Params.graphFilesDir + tokenFileName));
@@ -58,45 +60,72 @@ public class Exp2AlphaCoralFlow {
                 }
             }
 
-
-            Map<Integer, Double[]> corevalMap = new HashMap<>();
-
-            //for(int i=10;i>0;i=i-2)
-            {
-                final double coralK = 2 / 10d;
-                for (int year : graphMap.keySet()) {
-                    for (int period : graphMap.get(year).keySet()) {
-                        DirectedGraph tempGr = graphMap.get(year).get(period);
+            final double coralK = 2 / 10d;
+            for (int year : graphMap.keySet()) {
+                for (int period : graphMap.get(year).keySet()) {
+                    DirectedGraph tempGr = graphMap.get(year).get(period);
 
 
-                        List<Integer> del = new ArrayList<>();
-                        for (Object n : tempGr.getVertices()) {
-                            int node = (int) n;
+                    List<Integer> del = new ArrayList<>();
+                    for (Object n : tempGr.getVertices()) {
+                        int node = (int) n;
 
-                            Double nodeCore = 1d;
-                            if (corevalMap.containsKey(node)) {
-                                Double[] doubles = corevalMap.get(node);
-                                nodeCore = doubles[0];
-                            }
-                            if (nodeCore > coralK) {
-                                del.add(node);
-                            }
-
+                        if (!corevalMap.contains(node)) {
+                            del.add(node);
                         }
-                        int np = tempGr.getVertexCount();
-                        int ep = tempGr.getEdgeCount();
-                        for (int n : del) tempGr.removeVertex(n);
-                        String motifs = Exp2SimpleFlow.getMotifs(tempGr);
-                        String coeffs = Exp2SimpleFlow.getCoefficients(tempGr);
-                        wr2.write(token + "\t" + coralK + "\t" + year + "\t" + period + "\t" +
-                                tempGr.getVertexCount() + "\t" + np + "\t" +
-                                tempGr.getEdgeCount() + "\t" + ep + "\t" +
-                                motifs + "\t" + coeffs + "\r\n");
+
                     }
+
+                    for (int n : del) tempGr.removeVertex(n);
+
+                    int vertexCount = tempGr.getVertexCount();
+                    if (vertexCount > 1000)
+                        logger.info(token + " network has " + vertexCount + " nodes in " + year + "/" + period);
+                    String motifs = Exp2SimpleFlow.getMotifs(tempGr);
+                    String coeffs = Exp2SimpleFlow.getCoefficients(tempGr);
+                    wr2.write(token + "\t" + coralK + "\t" + year + "\t" + period + "\t" +
+                            vertexCount + "\t" +
+                            tempGr.getEdgeCount() + "\t" +
+                            motifs + "\t" + coeffs + "\r\n");
                 }
             }
+
         }
         wr2.close();
+    }
+
+    private static Set<Integer> readTokenCore(String token, String alphaCoreFile, int topCore) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(alphaCoreFile + token));
+        String line = "";
+        Map<Integer, Double> coralVals = new HashMap<>();
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        while ((line = br.readLine()) != null) {
+
+            String arr[] = line.split("\t");
+            if (arr[0].equalsIgnoreCase(token)) {
+                double c = Double.parseDouble(arr[2]);
+                int node = Integer.parseInt(arr[1]);
+                coralVals.put(node, c);
+                ds.addValue(c);
+            }
+        }
+        if (coralVals.isEmpty()) {
+            logger.info(" no nodes in the network: " + token);
+            return new HashSet<>();
+        }
+
+        double topThreshold = ds.getPercentile(topCore);
+        logger.info(topThreshold + " for %" + topCore);
+        Set<Integer> nodes = new HashSet<>();
+
+        for (int n : coralVals.keySet()) {
+            if (coralVals.get(n) <= topThreshold) {
+                nodes.add(n);
+            }
+        }
+
+        return nodes;
+
     }
 
 }

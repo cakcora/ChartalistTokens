@@ -17,9 +17,9 @@ import java.util.*;
 public class AlphaCore {
     private static final Logger logger = LoggerFactory.getLogger(AlphaCore.class);
 
-    public static Map<Integer, Double[]> findAlphaCoreValues(DirectedSparseMultigraph<Integer, TWEdge> gr) {
+    public static Map<Integer, Double> findAlphaCoreValues(DirectedSparseMultigraph<Integer, TWEdge> gr) {
 
-        Map<Integer, Double[]> coreVals = new HashMap<>();
+        Map<Integer, Double> coreVals = new HashMap<>();
         Map<Integer, Integer> nodes = new HashMap();
         DirectedSparseMultigraph graph = new DirectedSparseMultigraph<>();
         for (TWEdge edge : gr.getEdges()) {
@@ -27,30 +27,30 @@ public class AlphaCore {
             int to = edge.getTo();
             graph.addEdge(edge, from, to);
         }
-        int stepSize = 5;
-        for (int a = 100; a > 0; a = a - stepSize) {
+
+        double featureMap[][] = createFeatures(graph, nodes);
+        double[] depths = new ModifiedBandDepth().computeModifiedBandDepth(featureMap);
+        double max = 0d;
+        for (double d : depths) {
+            if (d > max) max = d;
+        }
+        int stepSize = (int) (100 * max / 20.0);
+        logger.info(stepSize + " length steps");
+        for (int a = (int) (100 * max); a > 0; a = a - stepSize) {
             double alpha = a / 100d;
 
             boolean keepIterating = true;
-            double max = 0d;
+
             while (keepIterating) {
                 if (graph.getEdgeCount() == 0) break;
                 keepIterating = false;
-                double featureMap[][] = createFeatures(graph, nodes);
+                featureMap = createFeatures(graph, nodes);
+                depths = new ModifiedBandDepth().computeModifiedBandDepth(featureMap);
 
-                double[] depths = new ModifiedBandDepth().computeModifiedBandDepth(featureMap);
-
-                for (double d : depths) {
-                    if (d > max) max = d;
-                }
-                while (100 * max < a) {
-                    a = a - stepSize;
-                }
-                alpha = a / 100d;
-                logger.info(alpha + " " + graph.getVertexCount() + "\t" + graph.getEdgeCount());
+//                logger.info(alpha + " " + graph.getVertexCount() + "\t" + graph.getEdgeCount());
                 for (int i = 0; i < depths.length; i++) {
                     if (depths[i] >= alpha) {
-                        coreVals.put(nodes.get(i), new Double[]{alpha, featureMap[i][0], featureMap[i][1]});
+                        coreVals.put(nodes.get(i), alpha);
                         if (graph.removeVertex(nodes.get(i)))
                             keepIterating = true;
                         else logger.error("Node is not in the graph. " + nodes.get(i));

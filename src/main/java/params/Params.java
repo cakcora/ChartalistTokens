@@ -29,6 +29,9 @@ public class Params {
 
     public static String simpleFlowFile = d + "experiments/" + "FlowMotifs.txt";
 
-    public static String alphaCoreFile = d + "experiments/" + "alphaCoral.txt";
     public static String coralFlowFile = d + "experiments/" + "alphaCoralFlows.txt";
+    public static String nodeIdsFile = "NodeIds.txt";
+    public static String alphaCoreDir = d + "alphacore/";
+
+    public static String kCoreDir = d + "kcore/";
 }
