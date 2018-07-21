@@ -6,12 +6,15 @@ package params;
  *
  */
 public class Params {
+    public static final int DAY = 1;
+    public static final int WEEK = 7;
     public static String d = "D:/Ethereum/";
+    public static String dDir = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/";
     public static String vDir = d + "fromVadim/";
     public static boolean countPerDay = true;
     public static boolean storeContractTransactions = true;
-    public static String tokenInfoFile = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/data/top200Tokens.csv";
-    public static String erc20FunctionsFile = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/data/erc20FunctionsFile.txt";
+    public static String tokenInfoFile = dDir + "data/top200Tokens.csv";
+    public static String erc20FunctionsFile = dDir + "data/erc20FunctionsFile.txt";
     public static int ercStandardFunctionLength = 10;
     public static int eth64 = 64;
     public static String tokenFilesDir = d + "tokens/";
@@ -34,4 +37,5 @@ public class Params {
     public static String alphaCoreDir = d + "alphacore/";
 
     public static String kCoreDir = d + "kcore/";
+
 }

@@ -17,19 +17,14 @@ import java.util.*;
 public class AlphaCore {
     private static final Logger logger = LoggerFactory.getLogger(AlphaCore.class);
 
-    public static Map<Integer, Double> findAlphaCoreValues(DirectedSparseMultigraph<Integer, TWEdge> gr) {
+    public static Map<Integer, Double> findAlphaCoreValues2(DirectedSparseMultigraph<Integer, TWEdge> graph) {
 
         Map<Integer, Double> coreVals = new HashMap<>();
         Map<Integer, Integer> nodes = new HashMap();
-        DirectedSparseMultigraph graph = new DirectedSparseMultigraph<>();
-        for (TWEdge edge : gr.getEdges()) {
-            int from = edge.getFrom();
-            int to = edge.getTo();
-            graph.addEdge(edge, from, to);
-        }
+
 
         double featureMap[][] = createFeatures(graph, nodes);
-        double[] depths = new ModifiedBandDepth().computeModifiedBandDepth(featureMap);
+        double[] depths = new ModifiedBandDepth().computeOld(featureMap);
         double max = 0d;
         for (double d : depths) {
             if (d > max) max = d;
@@ -45,7 +40,7 @@ public class AlphaCore {
                 if (graph.getEdgeCount() == 0) break;
                 keepIterating = false;
                 featureMap = createFeatures(graph, nodes);
-                depths = new ModifiedBandDepth().computeModifiedBandDepth(featureMap);
+                depths = new ModifiedBandDepth().computeOld(featureMap);
 
 //                logger.info(alpha + " " + graph.getVertexCount() + "\t" + graph.getEdgeCount());
                 for (int i = 0; i < depths.length; i++) {
@@ -63,7 +58,62 @@ public class AlphaCore {
                     }
                 }
             }
+        }
+        return coreVals;
+    }
 
+    public static Map<Integer, Double> findAlphaCoreValues(DirectedSparseMultigraph<Integer, TWEdge> graph) {
+
+        Map<Integer, Double> coreVals = new HashMap<>();
+        Map<Integer, Integer> nodes = new HashMap();
+
+
+        int stepsize = 1;
+        int a = (100);
+        double alpha = a / 100d;
+
+        boolean keepIterating = true;
+        double[] depths = null;
+        while (graph.getEdgeCount() > 0) {
+            if (!keepIterating) {
+                a = a - stepsize;
+                alpha = (a - stepsize) / 100.0;
+            } else {
+                logger.info("Iterating for " + alpha + "\tN:" + graph.getVertexCount() + "\tE:" + graph.getEdgeCount());
+                BigInteger featureMap[][] = createFeatures2(graph, nodes);
+                depths = new ModifiedBandDepth().compute(featureMap);
+                logger.info("Computed depth for " + alpha);
+            }
+            keepIterating = false;
+            double maxDepth = 0d;
+            for (double d : depths) {
+                if (d > maxDepth) maxDepth = d;
+            }
+            if ((maxDepth + stepsize / 100.0) < alpha) {
+                a = (int) (maxDepth * 100);
+                alpha = (a - stepsize) / 100.0;
+
+            }
+            for (int i = 0; i < depths.length; i++) {
+                if (depths[i] >= alpha) {
+                    coreVals.put(nodes.get(i), alpha);
+                    if (graph.removeVertex(nodes.get(i)))
+                        keepIterating = true;
+                    else logger.error("Node is not in the graph. " + nodes.get(i));
+                }
+            }
+            for (Object o : graph.getVertices().toArray()) {
+                int o1 = (int) o;
+                if (graph.getIncidentEdges(o1).size() == 0) {
+                    graph.removeVertex(o1);
+                }
+            }
+        }
+
+        Collection<Integer> vertices = graph.getVertices();
+        for (int n : vertices) {
+            coreVals.put(n, alpha);
+            logger.info("Adding: " + n);
         }
         return coreVals;
     }
@@ -96,5 +146,35 @@ public class AlphaCore {
             featureMap[i][1] = doubles[1];
         }
         return featureMap;
+    }
+
+    private static BigInteger[][] createFeatures2(DirectedSparseMultigraph graph, Map<Integer, Integer> nodes) {
+        int nIndex = 0;
+        List<BigInteger[]> featureMap = new ArrayList<>();
+        for (Object node : graph.getVertices()) {
+            int n = (int) node;
+
+            Collection edges = graph.getInEdges(n);
+            if (edges.size() == 0) {
+                continue;
+            }
+
+            BigInteger edgeWeights2 = BigInteger.ZERO;
+            for (Object edge : edges) {
+                TWEdge e = (TWEdge) edge;
+                edgeWeights2 = edgeWeights2.add(e.getEdgeWeight());
+            }
+            featureMap.add(new BigInteger[]{BigInteger.valueOf(edges.size()), edgeWeights2});
+            nodes.put(nIndex, n);
+            nIndex++;
+        }
+        int size = featureMap.size();
+        BigInteger[][] featureArr = new BigInteger[size][2];
+        for (int i = 0; i < size; i++) {
+            BigInteger[] doubles = featureMap.get(i);
+            featureArr[i][0] = doubles[0];
+            featureArr[i][1] = doubles[1];
+        }
+        return featureArr;
     }
 }

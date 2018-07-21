@@ -47,7 +47,7 @@ public class Exp2SimpleFlow {
         for (String file : files) {
             BufferedReader br = new BufferedReader(new FileReader(Params.graphFilesDir + file));
             Map<Integer, Map<Integer, DirectedSparseGraph>> graphMap = new TreeMap<>();
-            int granularity = 1;
+            int granularity = Params.DAY;
 
             String line = "";
             while ((line = br.readLine()) != null) {
@@ -75,13 +75,17 @@ public class Exp2SimpleFlow {
                     nodeSize += t.getVertexCount();
                     edgeSize += t.getEdgeCount();
 
-                    String motifs = getMotifs(t);
+                    long[] triads = getMotifCounts(t);
+
                     //String coeffs = getCoefficients(t);
                     //UndirectedKCore kCore = new UndirectedKCore();
                     //Core core = kCore.findCore(t);
                     // String cores = core.toString();
 //                logger.info(core.getDegeneracy()+"");
-                    String s1 = file + "\t" + g + "\t" + g2 + "\t" + t.getVertexCount() + "\t" + t.getEdgeCount() + motifs;
+                    String s1 = file + "\t" + g + "\t" + g2 + "\t" + t.getVertexCount() + "\t" + t.getEdgeCount();
+                    for (long i : triads) {
+                        s1 += s1 + "\t" + i;
+                    }
                     logger.info(s1);
                     wr.write(s1 + "\r\n");
                     wr.flush();
@@ -108,11 +112,10 @@ public class Exp2SimpleFlow {
     }
 
 
-    static String getMotifs(DirectedGraph t) {
+    static long[] getMotifCounts(DirectedGraph t) {
         String q = "";
         long[] triad_counts = new TriadicCensus().getCounts(t);
-        for (int d = 1; d <= 16; d++) q = q + "\t" + triad_counts[d];
-        return q;
+        return triad_counts;
     }
 
     static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {

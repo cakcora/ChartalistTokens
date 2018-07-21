@@ -22,21 +22,24 @@ public class Exp2AlphaCoralFlow {
     private static final Logger logger = LoggerFactory.getLogger(Exp2AlphaCoralFlow.class);
 
     public static void main(String[] args) throws Exception {
-        int granularity = 1;
-        Set<String> tokenMap = Contract.readTopTokensNames(5);
+        int granularity = Params.DAY;
+        Set<String> tokenMap = Contract.readTopTokensNames(200);
+        tokenMap.remove("beautychain1");
+        tokenMap.remove("beautychain2");
         int topCore = 5;
+        int maxTokenValue = 30;
 //        tokenMap = new HashSet<>(); tokenMap.add("ades"); tokenMap.add("aion");tokenMap.add("aragon");
         List<String> tokenGraphFiles = Files.getTokenFiles(Params.graphFilesDir);
         tokenGraphFiles.remove(Params.userToUserFile);
         tokenGraphFiles.remove(Params.nodeIdsFile);
-        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.coralFlowFile));
+        BufferedWriter wr2 = new BufferedWriter(new FileWriter(Params.coralFlowFile + topCore));
         for (String tokenFileName : tokenGraphFiles) {
 
             String token = tokenFileName.substring(7, tokenFileName.length() - 6);
             if (!tokenMap.contains(token)) continue;
 
-            Set<Integer> corevalMap = readTokenCore(token, Params.alphaCoreDir, topCore);
-            logger.info(token + " has " + corevalMap.size() + " nodes.");
+            Set<Integer> coreNodes = readTokenCore(token, Params.alphaCoreDir, topCore);
+            logger.info(token + " has " + coreNodes.size() + " nodes.");
             DirectedSparseMultigraph globalGr = new DirectedSparseMultigraph();
             Map<Integer, Map<Integer, DirectedSparseGraph>> graphMap = new TreeMap<>();
             BufferedReader br = new BufferedReader(new FileReader(Params.graphFilesDir + tokenFileName));
@@ -47,7 +50,6 @@ public class Exp2AlphaCoralFlow {
                 int n2 = Integer.parseInt(arr[1]);
                 long unixTime = Long.parseLong(arr[2]);
                 BigInteger weight = new BigInteger(arr[3]);
-                int maxTokenValue = 30;
                 if (arr[3].length() < maxTokenValue) {
                     globalGr.addEdge(new TWEdge(unixTime, n1, n2, weight), n1, n2);
                     DateTime time = new DateTime(1000 * unixTime);
@@ -60,33 +62,40 @@ public class Exp2AlphaCoralFlow {
                 }
             }
 
-            final double coralK = 2 / 10d;
             for (int year : graphMap.keySet()) {
                 for (int period : graphMap.get(year).keySet()) {
                     DirectedGraph tempGr = graphMap.get(year).get(period);
-
 
                     List<Integer> del = new ArrayList<>();
                     for (Object n : tempGr.getVertices()) {
                         int node = (int) n;
 
-                        if (!corevalMap.contains(node)) {
+                        if (!coreNodes.contains(node)) {
                             del.add(node);
                         }
 
                     }
-
+                    int vc1 = tempGr.getVertexCount();
+                    int ec1 = tempGr.getEdgeCount();
                     for (int n : del) tempGr.removeVertex(n);
 
                     int vertexCount = tempGr.getVertexCount();
-                    if (vertexCount > 1000)
+                    int edgeCount = tempGr.getEdgeCount();
+                    if (vertexCount > 1000) {
                         logger.info(token + " network has " + vertexCount + " nodes in " + year + "/" + period);
-                    String motifs = Exp2SimpleFlow.getMotifs(tempGr);
+                    }
+                    long[] triads = Exp2SimpleFlow.getMotifCounts(tempGr);
+                    String motifs = "";
+                    for (long i : triads) {
+                        motifs = motifs + i + "\t";
+                    }
                     String coeffs = Exp2SimpleFlow.getCoefficients(tempGr);
-                    wr2.write(token + "\t" + coralK + "\t" + year + "\t" + period + "\t" +
-                            vertexCount + "\t" +
-                            tempGr.getEdgeCount() + "\t" +
-                            motifs + "\t" + coeffs + "\r\n");
+                    wr2.write(token + "\t" +
+                            year + "\t" + period + "\t" +
+                            vertexCount + "\t" + vc1 + "\t" +
+                            edgeCount + "\t" + ec1 + "\t" +
+                            motifs + coeffs + "\r\n");
+                    wr2.flush();
                 }
             }
 
@@ -115,7 +124,7 @@ public class Exp2AlphaCoralFlow {
         }
 
         double topThreshold = ds.getPercentile(topCore);
-        logger.info(topThreshold + " for %" + topCore);
+        logger.info("Max depth: " + topThreshold + " for %" + topCore);
         Set<Integer> nodes = new HashSet<>();
 
         for (int n : coralVals.keySet()) {

@@ -27,7 +27,7 @@ public class Exp2KCore {
     private static final Logger logger = LoggerFactory.getLogger(Exp2KCore.class);
 
     public static void main(String[] args) throws Exception {
-        int granularity = 1;
+        int granularity = Params.DAY;
         boolean useExisting = false;
         Set<String> tokenMap = Contract.readTopTokensNames(200);
         if (!useExisting)
