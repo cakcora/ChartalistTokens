@@ -77,7 +77,7 @@ public class Exp2SimpleFlow {
 
                     long[] triads = getMotifCounts(t);
 
-                    //String coeffs = getCoefficients(t);
+                    //String coeffs = avgClusCoeff(t);
                     //UndirectedKCore kCore = new UndirectedKCore();
                     //Core core = kCore.findCore(t);
                     // String cores = core.toString();
@@ -97,7 +97,7 @@ public class Exp2SimpleFlow {
         wr.close();
     }
 
-    static String getCoefficients(DirectedGraph t) {
+    public static String getCoefficients(DirectedGraph t) {
         String h = "";
         Map<Integer, Double> coeff = new Metrics().clusteringCoefficients(t);
         Map<Integer, Integer> ma = new TreeMap<>();
@@ -112,19 +112,19 @@ public class Exp2SimpleFlow {
     }
 
 
-    static long[] getMotifCounts(DirectedGraph t) {
+    public static long[] getMotifCounts(DirectedGraph t) {
         String q = "";
         long[] triad_counts = new TriadicCensus().getCounts(t);
         return triad_counts;
     }
 
-    static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {
+    public static Graph getGraph(Map<Integer, Map<Integer, DirectedSparseGraph>> gm, int year, int tp) {
         if (!gm.containsKey(year)) gm.put(year, new TreeMap<>());
         if (!gm.get(year).containsKey(tp)) gm.get(year).put(tp, new DirectedSparseGraph<>());
         return gm.get(year).get(tp);
     }
 
-    static int getPeriod(int granularity, DateTime time) {
+    public static int getPeriod(int granularity, DateTime time) {
         if (granularity == 1) return time.getDayOfYear();
         if (granularity == 7) return time.getWeekOfWeekyear();
         if (granularity == 31) return time.getMonthOfYear();

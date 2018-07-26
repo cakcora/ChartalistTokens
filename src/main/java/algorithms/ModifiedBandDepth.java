@@ -16,8 +16,9 @@ public class ModifiedBandDepth {
 
     static BigInteger comb(final long N) {
         final int K = 2;
-        //the code always called for comb(N,2), so I made k a local constant.
-        if (combCache.containsKey(N)) return combCache.get(N);
+        //the code always called for comb(N,2) because we have 2 features of each data point, so I made k a local constant.
+        if (combCache.containsKey(N))
+            return combCache.get(N);
         BigInteger ret = BigInteger.ONE;
         for (int k = 0; k < K; k++) {
             ret = ret.multiply(BigInteger.valueOf(N - k))
@@ -92,7 +93,7 @@ public class ModifiedBandDepth {
                 }
                 for (int element = 0; element < n; element++) {
                     if (element % i == i - 1) {
-                        logger.info(element + " points processed");
+                        logger.info((1 + element) + " points processed");
                     }
 
                     BigInteger val = x[element][column];
@@ -117,8 +118,10 @@ public class ModifiedBandDepth {
                 }
                 logger.info(n + " data points column:" + column + " Unique:" + cacheG.size());
             }
+            double v = comb(n).doubleValue();
             for (int i2 = 0; i2 < depth.length; i2++) {
-                depth[i2] = depth[i2] / (comb(n).multiply(new BigInteger(d + ""))).doubleValue();
+//                depth[i2] = depth[i2] / (comb(n).multiply(new BigInteger(d + ""))).doubleValue();
+                depth[i2] = depth[i2] / (d * v);
             }
         }
 
@@ -127,53 +130,5 @@ public class ModifiedBandDepth {
 
     }
 
-    public double[] computeOld(double[][] x) {
-        {
-            // n: number of observations (samples);  d: dimension of the data
-            int n = x.length;
-            int d = x[0].length;
 
-
-            if (d == 1) {
-                x = transpose(x);
-            }
-            double[] depth = new double[n];
-            double[][] orderedMatrix = x;
-            if (n > 1) {
-                for (int column = 0; column < d; column++) {
-                    double[] a1 = new double[n];
-                    for (int r = 0; r < n; r++) {
-                        a1[r] = x[r][column];
-                    }
-                    for (int r2 = 0; r2 < n; r2++) {
-                        orderedMatrix[r2][column] = a1[r2];
-                    }
-
-                    for (int element = 0; element < n; element++) {
-                        int i = 100000;
-                        if (element % i == i - 1) {
-                            logger.info(element + " points processed");
-                        }
-                        double[] arr1 = new double[n];
-                        for (int r = 0; r < n; r++) {
-                            arr1[r] = orderedMatrix[r][column];
-                        }
-                        long index1 = whichLength(arr1, x[element][column], false);
-                        double[] arr2 = new double[n];
-                        for (int r = 0; r < n; r++) {
-                            arr2[r] = orderedMatrix[r][column];
-                        }
-                        long index2 = whichLength(arr2, x[element][column], true);
-                        long multiplicity = index2 - index1;
-                        depth[element] = depth[element] + index1 * (n - (index2)) + multiplicity * (n - index2 + index1) + comb(multiplicity).doubleValue();
-
-                    }
-                }
-                for (int i = 0; i < depth.length; i++) {
-                    depth[i] = depth[i] / (comb(n).multiply(new BigInteger(d + ""))).doubleValue();
-                }
-            }
-            return (depth);
-        }
-    }
 }
