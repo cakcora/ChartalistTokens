@@ -26,7 +26,7 @@ public class Exp2AlphaCoralFlow {
         Set<String> tokenMap = Contract.readTopTokensNames(200);
         tokenMap.remove("beautychain1");
         tokenMap.remove("beautychain2");
-        int topCore = 5;
+        int topCore = 10;
         int maxTokenValue = 30;
 //        tokenMap = new HashSet<>(); tokenMap.add("ades"); tokenMap.add("aion");tokenMap.add("aragon");
         List<String> tokenGraphFiles = Files.getTokenFiles(Params.graphFilesDir);

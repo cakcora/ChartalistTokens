@@ -9,7 +9,7 @@ public class Params {
     public static final int DAY = 1;
     public static final int WEEK = 7;
     public static String d = "D:/Ethereum/";
-    public static String dDir = "D:/Dropbox/Publications/PostDoc work/3 - Chartalist/";
+    public static String dDir = "D:/Dropbox/Academic/PostDoc work/3 - Chartalist/";
     public static String vDir = d + "fromVadim/";
     public static boolean countPerDay = true;
     public static boolean storeContractTransactions = true;
@@ -23,7 +23,9 @@ public class Params {
 
 
     public static String userToUserFile = "userToUserFile.txt";
-    public static String graphFilesDir = d + "graphs/";
+    //    public static String graphFilesDir =d+"graphs/";
+    public static String graphFilesDir = "c://graphs/";
+
     public static String tmotifFilesDir = d + "graphSamples/";
     public static String ethrDir = d + "fromR/";
 
@@ -32,9 +34,11 @@ public class Params {
 
     public static String simpleFlowFile = d + "experiments/" + "FlowMotifs.txt";
 
-    public static String coralFlowFile = d + "experiments/" + "alphaCoralFlows.txt";
+    //    public static String coralFlowFile = d + "experiments/" + "alphaCoralFlows.txt";
+    public static String coralFlowFile = "c://alphaCoralFlows.txt";
     public static String nodeIdsFile = "NodeIds.txt";
-    public static String alphaCoreDir = d + "alphacore/";
+    //    public static String alphaCoreDir = d + "alphacore/";
+    public static String alphaCoreDir = "c://alphacore/";
 
     public static String kCoreDir = d + "kcore/";
 
