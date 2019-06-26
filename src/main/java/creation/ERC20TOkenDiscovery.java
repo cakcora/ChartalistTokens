@@ -34,7 +34,7 @@ public class ERC20TOkenDiscovery {
 
         Map<String, ERC20Function> functionMap = ERC20Function.readERC20Functions();
         Map<String, Integer> counts = new HashMap<String, Integer>();
-        for (int i = 1; i <= 56; i++) {
+        for (int i = 51; i <= 51; i++) {//the 51st file has all of blocks after 5M
             BufferedReader br = new BufferedReader(new FileReader(Params.vDir + i + ".csv"));
             String line = br.readLine();
             logger.info("parsing " + i + ".csv");
@@ -81,6 +81,7 @@ public class ERC20TOkenDiscovery {
 
                     }
                 } catch (Exception e) {
+                    logger.error(line);
                     e.printStackTrace();
                 }
             }

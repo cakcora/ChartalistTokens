@@ -1,5 +1,5 @@
-#install.packages("devtools")
-#devtools::install_github("BSDStudios/ethr")
+install.packages("devtools")
+devtools::install_github("BSDStudios/ethr")
 require(ethr)
 library(data.table)
 

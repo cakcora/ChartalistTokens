@@ -8,8 +8,8 @@ package params;
 public class Params {
     public static final int DAY = 1;
     public static final int WEEK = 7;
-    public static String d = "D:/Ethereum/";
-    public static String dDir = "D:/Dropbox/Academic/PostDoc work/3 - Chartalist/";
+    public static String d = "/home/user/ethereumdata/";
+    public static String dDir = "/home/user/Dropbox/Academic/PostDoc work/3 - Chartalist/";
     public static String vDir = d + "fromVadim/";
     public static boolean countPerDay = true;
     public static boolean storeContractTransactions = true;
@@ -21,6 +21,7 @@ public class Params {
     public static int ethAddressPrecedingZeros = 24;
     public static String ethAddressPrecedingString = "0x";
 
+    public final static int mintxpertoken = 5000;
 
     public static String userToUserFile = "userToUserFile.txt";
     //    public static String graphFilesDir =d+"graphs/";

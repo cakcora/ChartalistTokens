@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class TokenFiltering {
     private static final Logger logger = LoggerFactory.getLogger(TokenFiltering.class);
-    private static int fileCount = 56;
+    private static int fileCount = 51;
     public static void main(String args[]) throws Exception {
 
 
@@ -116,7 +116,8 @@ public class TokenFiltering {
             Contract token = tokenMap.get(address);
             token.addTransaction(tx, unixTime);
             List<Transaction> transactions = token.getTransactions();
-            if (transactions.size() > 5000) {
+
+            if (transactions.size() > Params.mintxpertoken) {
                 writeToFile(token.getShortName(), transactions);
                 token.clearTransactions();
             }

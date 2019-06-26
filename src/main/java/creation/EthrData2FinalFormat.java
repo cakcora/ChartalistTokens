@@ -24,14 +24,15 @@ public class EthrData2FinalFormat {
 
         //Format from Vadim: from,gas,gasprice,input,to,value,gas_used,miner,number,timestamp
         //ethr format: block_hash,block_number,from,gas,gasprice,hash,input,nonce,to,transaction_index,value,v,r,s
-        int startBlock = 5000001, endBlock = 5565630;
-        int fIndex = 1;
+        int startBlock = 5000001, endBlock = 8565630;
+
         BufferedReader hbr = new BufferedReader(new FileReader(Params.ethrDir + "headers/header.txt"));
 //header_data format blocknumber,difficulty,extra_data,gas_limit,gas_used,hash,logs_bloom,miner, mix_hash,nonce,number,parent_hash, receipts_root,sha3_uncles,size,state_root,timestamp,total_difficulty,transactions_root
         HashMap<Long, String> bMap = new HashMap<Long, String>();
         HashMap<Long, String> mMap = new HashMap<Long, String>();
         String line;
         hbr.readLine();
+        long maxblk=-1;
         while ((line = hbr.readLine()) != null) {
             String[] arr = line.split(",");
             Long blockNumber = Long.parseLong(arr[0]);
@@ -39,10 +40,11 @@ public class EthrData2FinalFormat {
             String miner = arr[7];
             bMap.put(blockNumber, unixTime);
             mMap.put(blockNumber, miner);
+            maxblk=blockNumber;
         }
-        logger.info("Blocks: " + bMap.size());
+        logger.info("Blocks: " + bMap.size()+" maximum block height is "+maxblk);
         String form = "from,gas,gasprice,input,to,value,gas_used,miner,number,timestamp";
-        String fileName = Params.vDir + (50 + fIndex) + ".csv";
+        String fileName = Params.vDir + (51) + ".csv";
         BufferedWriter wr = new BufferedWriter(new FileWriter(fileName));
         wr.append(form + "\r\n");
         StringBuffer sb = new StringBuffer();
